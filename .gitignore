@@ -1,0 +1,6 @@
+/tools/mpnext
+*.o
+*.txt
+*.csv
+*.log
+*.zip
