@@ -12,17 +12,65 @@
 #include <linux/if_packet.h>
 #include <net/ethernet.h> /* the L2 protocols */
 #include "UDPClient.h"
+#include <chrono>
+#include <sstream>
+#include "Frame.h"
 
-#define MAX_MSG_LEN 1000
+using namespace std;
+
+#define MAX_MSG_LEN 1500
+
+void init_content(char* content, int len) {
+	for (int i = 0;i < len;i++) {
+		content[i] = rand() % 10 + '0';
+	}
+}
+
+int update_buffer(char* buf, long long timestamp, unsigned long long dss, char * content) {
+	struct Frame fra;
+	memset(&fra, 0, sizeof(fra));
+	fra.timestamp = timestamp;
+	fra.dss = dss;
+	strcpy(fra.content,content);
+	bzero(buf,MAX_MSG_LEN);
+	int count = 0;
+	memcpy(buf, &fra.dss, sizeof(fra.dss));
+	count += sizeof(fra.dss);
+	memcpy(buf + count, &fra.timestamp, sizeof(fra.timestamp));
+	count += sizeof(fra.timestamp);
+	memcpy(buf + count, fra.content, strlen(fra.content));
+	count += strlen(fra.content);
+	return count;
+}
+
+long long gettimestamp() {
+	chrono::time_point<std::chrono::system_clock> now = chrono::system_clock::now();
+	auto duration = now.time_since_epoch();
+	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+	return millis;
+}
+
+unsigned long long dss = 0;
 
 int main() {
+	srand(time(NULL));
 	UDPClient udpC1;
-	udpC1.init("127.0.0.1", 12345);
+	udpC1.init("192.168.1.1", 12345);
 	char buffer[MAX_MSG_LEN];
-	strcpy(buffer,"1234567890");
+	char content[MAX_MSG_LEN];
+	bzero(content,MAX_MSG_LEN);
+	init_content(content, 1400);
 	while (true) {
-		udpC1.sendto_x(buffer,strlen(buffer),0);
-		usleep(1000);
+		++dss;
+		int packet_length = update_buffer(buffer, gettimestamp(), dss, content);
+		int len = udpC1.sendto_x(buffer,packet_length,0);
+		if (len < 0) {
+			perror("sendto");
+			exit(0);
+		} else {
+			//printf("%d bytes sent, %s\n",len,content);
+		}
+		usleep(30);
 	}
 	return 0;
 }

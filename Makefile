@@ -4,10 +4,10 @@ CXXFLAGS=-Wall -std=c++11
 INC = -I./include
 LIBS = -L./lib -lpthread
 
-all: udp2
+all: udp2client
 
-udp2 : build/main.o
-	$(CC) $(CXXFLAGS) -o tools/mpnext build/main.o build/UDPClient.o $(LIBS)
+udp2client : build/main.o
+	$(CC) $(CXXFLAGS) -o tools/udp2client build/main.o build/UDPClient.o $(LIBS)
 
 build/main.o : build/UDPClient.o tools/main.cpp 
 	$(CC) $(CXXFLAGS) $(INC) -c tools/main.cpp build/UDPClient.o -o build/main.o  

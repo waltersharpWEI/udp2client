@@ -20,7 +20,7 @@
 #include "UDPClient.h"
 
 UDPClient::UDPClient() {
-	 if(sockfd = socket(AF_INET, SOCK_DGRAM, 0) < 0)
+	 if((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	 {
 		 perror ("socket");
 		 exit(1);
@@ -43,7 +43,7 @@ int UDPClient::init(char *IPx, int portx) {
 
 //sendto oop version, simple wrapper
 int UDPClient::sendto_x(const void * msg, int len, unsigned int flags){
-	return sendto(sockfd, msg, strlen((char*)msg), 0, (struct sockaddr*)&addr,sizeof(addr));
+	return sendto(sockfd, msg, len, 0, (struct sockaddr*)&addr,sizeof(addr));
 }
 
 //clear all UDP options,
