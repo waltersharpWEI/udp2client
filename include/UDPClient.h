@@ -1,57 +1,47 @@
 /*
- * UDPServer.h
+ * UDPClient.h
  *
- *  Created on: Sep 4, 2019
+ *  Created on: Dec 23, 2019
  *      Author: ubuntu
  */
 
-#ifndef UDPCLIENT_H_
-#define UDPCLIENT_H_
+#ifndef SRC_UDPCLIENT_H_
+#define SRC_UDPCLIENT_H_
 
-#include "Segment.h"
-#include "mpparas.h"
-#include "threadsafe_queue.h"
-#include <algorithm>
-#include <queue>
-#include <thread>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#define ADDR_LEN 100
 
-#define MAX_MSG_SIZE 256
-#define SERVER_PORT  9987
-
-namespace mp
-{
-
-class UDPClient
-{
-private:
-	char                   IP[MAXLINE];
-	struct sockaddr_in     serv_addr;
-	char                   buf[MAXLINE];
-	char                   port[MAXLINE];
-	int                    sock_id;
-	int                    send_len;
-	socklen_t              serv_addr_len;
-	char				   content[MAXLINE];
-	int                    content_size;
+class UDPClient {
+	int send_buffer_size;
+	int mss;
+	int current_delay;
+	double current_loss_event_rate;
+	int current_througput;
+	int current_delay_jitter;
+	double current_psnr;
+	int current_rtt;
+	int smoothed_rtt;
+	char IP[ADDR_LEN];
+	int port;
+	int sockfd, len;
+	struct sockaddr_in addr;
 public:
 	UDPClient();
 	virtual ~UDPClient();
-	//TCPClient(threadsafe_queue<Segment> *syncQueue);
-	UDPClient(const char* IP, const char* ports,void* content, int content_size);
-	int move();
-	int start();
-	void run();
+	//initialize the IP and port
+	int init(char *IP, int port);
+	//sendtox sendto wrapper of UDP sendto
+	int sendto_x(const void * msg, int len, unsigned int flags);
+	//clear all UDP options,
+	//call before set the UDP-mode
+	void optclear();
+	//set to UDP-Default
+	void setOptDefault();
+	//set to UDP-Lite
+	void setOptLite();
+	//set to UDP-Soomro
+	void setOptSoomro();
+	//set the buffer size to size in bytes
+	void setBuffer(int size);
 };
 
-} /* namespace mp */
-
-#endif /* UDPCLIENT_H_ */
+#endif /* SRC_UDPCLIENT_H_ */

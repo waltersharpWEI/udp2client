@@ -1,80 +1,69 @@
 /*
- * UDPServer.cpp
+ * UDPClient.cpp
  *
- *  Created on: Sep 4, 2019
+ *  Created on: Dec 23, 2019
  *      Author: ubuntu
  */
 
-#include "stdio.h"
-#include "string.h"
-#include "stdlib.h"
-#include "time.h"
-#include <thread>
-#include <iostream>
+
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <linux/if_packet.h>
+#include <net/ethernet.h> /* the L2 protocols */
 #include "UDPClient.h"
 
-namespace mp
-{
-
 UDPClient::UDPClient() {
-	// TODO Auto-generated constructor stub
-
-}
-
-// C++ also use this to use the object itself created
-
-UDPClient::UDPClient(const char* IP, const char* port,void* content,int content_size)
-{
-	//printf("port cpy\n");
-	strcpy(this->port,port);
-	//printf("IP cpy\n");
-	strcpy(this->IP, IP);
-	//printf("Content cpy\n");
-	memcpy(this->content, content, content_size * sizeof(char));
-	this->content_size = content_size;
-	//printf("%s\n",(char*)this->content);
-    //std::cout << "UDP Client started on socket: " << IP << "-" << port << std::endl;
-
+	 if(sockfd = socket(AF_INET, SOCK_DGRAM, 0) < 0)
+	 {
+		 perror ("socket");
+		 exit(1);
+	 }
 }
 
 UDPClient::~UDPClient() {
-	close(sock_id);
+	close(sockfd);
 }
 
-void UDPClient::run(){
-	move();
+//initialize the IP and port
+int UDPClient::init(char *IPx, int portx) {
+	strcpy(IP,IPx);
+	port = portx;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = inet_addr(IP);
 }
 
-int UDPClient::move() {
-	if ((sock_id = socket(AF_INET,SOCK_DGRAM,0)) < 0) {
-		perror("Create socket failed\n");
-		exit(0);
-	}
-	/*fill the server sockaddr_in struct*/
-	memset(&serv_addr,0,sizeof(serv_addr));
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(atoi(port));
-	serv_addr.sin_addr.s_addr = inet_addr(IP);
-	serv_addr_len = sizeof(serv_addr);
-	bzero(buf, MAXLINE);
-	memcpy(buf, content, content_size * sizeof(char));
-	send_len = sendto(sock_id, buf, content_size, 0,(struct sockaddr*)&serv_addr,serv_addr_len);
-	if(send_len < 0) {
-		printf("Send Data To Server Failed!\n");
-		return 1;
-	}
-	close(sock_id);
-	return 0;
+//sendto oop version, simple wrapper
+int UDPClient::sendto_x(const void * msg, int len, unsigned int flags){
+	return sendto(sockfd, msg, strlen((char*)msg), 0, (struct sockaddr*)&addr,sizeof(addr));
 }
 
-int UDPClient::start(){
-	std::thread t(std::bind(&UDPClient::run, this));
-	t.join();
-	return 0;
-}
+//clear all UDP options,
+//call before set the UDP-mode
+void UDPClient::optclear() {
 
-} /* namespace mp */
+}
+//set to UDP-Default
+void UDPClient::setOptDefault() {
+
+}
+//set to UDP-Lite
+void UDPClient::setOptLite() {
+
+}
+//set to UDP-Soomro
+void UDPClient::setOptSoomro(){
+
+}
+//set the buffer size to size in bytes
+void UDPClient::setBuffer(int size){
+
+}
