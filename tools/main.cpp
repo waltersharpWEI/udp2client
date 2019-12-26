@@ -55,7 +55,7 @@ unsigned long long dss = 0;
 int main() {
 	srand(time(NULL));
 	UDPClient udpC1;
-	udpC1.init("192.168.1.1", 12345);
+	udpC1.init("172.31.43.94", 12345);
 	char buffer[MAX_MSG_LEN];
 	char content[MAX_MSG_LEN];
 	bzero(content,MAX_MSG_LEN);
