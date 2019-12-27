@@ -37,7 +37,7 @@ public:
 	//set to UDP-Default
 	void setOptDefault();
 	//set to UDP-Lite
-	void setOptLite();
+	void setOptLite(int cov);
 	//set to UDP-Soomro
 	void setOptSoomro();
 	//set the buffer size to size in bytes

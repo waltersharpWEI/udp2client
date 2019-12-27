@@ -56,8 +56,15 @@ void UDPClient::setOptDefault() {
 
 }
 //set to UDP-Lite
-void UDPClient::setOptLite() {
-
+void UDPClient::setOptLite(int cov) {
+	close(sockfd);
+	if((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDPLITE)) < 0)
+	{
+		perror ("UDP-Lite socket");
+		exit(1);
+	}
+	int coverage = 10;
+	//setsockopt(sockfd, IPPROTO_UDPLITE, UDPLITE_SEND_CSCOV, (int*)&coverage, sizeof(int));
 }
 //set to UDP-Soomro
 void UDPClient::setOptSoomro(){

@@ -55,14 +55,15 @@ unsigned long long dss = 0;
 int main() {
 	srand(time(NULL));
 	UDPClient udpC1;
-	udpC1.init("172.31.43.94", 12345);
+	//udpC1.setOptLite(10);
+	udpC1.init("192.168.243.145", 12345);
 	char buffer[MAX_MSG_LEN];
 	char content[MAX_MSG_LEN];
 	bzero(content,MAX_MSG_LEN);
 	init_content(content, 1400);
 	while (true) {
 		++dss;
-		int packet_length = update_buffer(buffer, gettimestamp(), dss, content);
+		int packet_length = update_buffer(buffer, gettimestamp() - 15, dss, content);
 		int len = udpC1.sendto_x(buffer,packet_length,0);
 		if (len < 0) {
 			perror("sendto");
@@ -70,7 +71,7 @@ int main() {
 		} else {
 			//printf("%d bytes sent, %s\n",len,content);
 		}
-		usleep(30);
+		//usleep(30);
 	}
 	return 0;
 }
