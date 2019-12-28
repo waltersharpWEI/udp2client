@@ -55,23 +55,26 @@ unsigned long long dss = 0;
 int main() {
 	srand(time(NULL));
 	UDPClient udpC1;
-	//udpC1.setOptLite(10);
+	udpC1.setOptLite(10);
 	udpC1.init("192.168.243.145", 12345);
 	char buffer[MAX_MSG_LEN];
 	char content[MAX_MSG_LEN];
 	bzero(content,MAX_MSG_LEN);
 	init_content(content, 1400);
+	int clock_offset = -5;
 	while (true) {
 		++dss;
-		int packet_length = update_buffer(buffer, gettimestamp() - 15, dss, content);
+		int packet_length = update_buffer(buffer, gettimestamp() + clock_offset, dss, content);
 		int len = udpC1.sendto_x(buffer,packet_length,0);
+		//send error
 		if (len < 0) {
 			perror("sendto");
 			exit(0);
 		} else {
 			//printf("%d bytes sent, %s\n",len,content);
 		}
-		//usleep(30);
+		//769 um = 14Mpbs CBR video stream
+		usleep(769);
 	}
 	return 0;
 }

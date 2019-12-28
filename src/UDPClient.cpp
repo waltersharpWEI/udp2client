@@ -14,10 +14,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/udp.h>
 #include <arpa/inet.h>
 #include <linux/if_packet.h>
 #include <net/ethernet.h> /* the L2 protocols */
 #include "UDPClient.h"
+
+#define UDPLITE_SEND_CSCOV  10
+#define UDPLITE_RECV_CSCOV  11
 
 UDPClient::UDPClient() {
 	 if((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -63,8 +67,8 @@ void UDPClient::setOptLite(int cov) {
 		perror ("UDP-Lite socket");
 		exit(1);
 	}
-	int coverage = 10;
-	//setsockopt(sockfd, IPPROTO_UDPLITE, UDPLITE_SEND_CSCOV, (int*)&coverage, sizeof(int));
+	int val = 8;
+	setsockopt(sockfd, IPPROTO_UDP, UDPLITE_SEND_CSCOV, &val, sizeof(int));
 }
 //set to UDP-Soomro
 void UDPClient::setOptSoomro(){
