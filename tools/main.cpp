@@ -52,19 +52,60 @@ long long gettimestamp() {
 
 unsigned long long dss = 0;
 
-int main() {
+int main(int argc, char *argv[]) {
 	srand(time(NULL));
+	int opt;
+	bool optLite = false;
+	int packet_interval = 769;
+	int clock_offset = -5;
+	int flow_time = 20;
+
+	while ((opt = getopt(argc, argv, "k:p:c:o")) != -1) {
+		switch (opt) {
+		case 'p':
+			printf("packet interval: %s\n", optarg);
+			packet_interval = atoi(optarg);
+			break;
+		case 'c':
+			printf("clock offset: %s\n", optarg);
+			clock_offset = atoi(optarg);
+			break;
+		case 'k':
+			printf("flow time: %s\n", optarg);
+			flow_time = atoi(optarg);
+			break;
+		case 'o':
+			printf("Using UDP-Lite\n");
+			optLite = true;
+			break;
+		case '?':
+			printf("Unknown option: %c", optopt);
+			break;
+		}
+	}
+
+	printf("start the main part of the program.\n");
+
 	UDPClient udpC1;
-	udpC1.setOptLite(10);
-	udpC1.init("192.168.243.145", 12345);
+	if (optLite) {
+		udpC1.setOptLite(10);
+	}
+	udpC1.init("192.168.6.136", 12345);
 	char buffer[MAX_MSG_LEN];
 	char content[MAX_MSG_LEN];
 	bzero(content,MAX_MSG_LEN);
 	init_content(content, 1400);
-	int clock_offset = -5;
+
+	//769
+	long long start_time = gettimestamp();
+
 	while (true) {
 		++dss;
-		int packet_length = update_buffer(buffer, gettimestamp() + clock_offset, dss, content);
+		long long current_time = gettimestamp();
+		if (current_time - start_time >= 1000 * flow_time) {
+			//exit(0);
+		}
+		int packet_length = update_buffer(buffer, current_time + clock_offset, dss, content);
 		int len = udpC1.sendto_x(buffer,packet_length,0);
 		//send error
 		if (len < 0) {
@@ -74,7 +115,8 @@ int main() {
 			//printf("%d bytes sent, %s\n",len,content);
 		}
 		//769 um = 14Mpbs CBR video stream
-		usleep(769);
+
+		//usleep(packet_interval);
 	}
 	return 0;
 }
